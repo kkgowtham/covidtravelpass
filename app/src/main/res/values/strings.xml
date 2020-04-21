@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">COVID CCMC Travel Pass</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="otp_send_to">Otp Send To</string>
+    <string name="enter_otp">Enter OTP</string>
+    <string name="verify_otp">Verify OTP</string>
+    <string name="emergency">Emergency</string>
+    <string name="essentials">Essentials</string>
+    <string name="enter_name">Enter Name</string>
+    <string name="door_no">Door No</string>
+    <string name="address_line_1">Address Line 1</string>
+    <string name="vehicle_registration">Vehicle Registration</string>
+
+    <string-array name="taluk">
+        <item>Annur</item>
+        <item>Anaimalai</item>
+        <item>Coimbatore North</item>
+        <item>Coimbatore South</item>
+        <item>Kinathukidavu</item>
+        <item>Madukkarai</item>
+        <item>Mettupalayam</item>
+        <item>Perur</item>
+        <item>Pollachi</item>
+        <item>Sulur</item>
+        <item>Valparai</item>
+    </string-array>
+</resources>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    tools:context=".UserDetailsActivity">
+    <EditText
+        android:id="@+id/nameEditText"
+        android:hint="@string/enter_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <EditText
+        android:id="@+id/addressLine"
+        android:layout_width="match_parent"
+        android:hint="@string/address_line_1"
+        android:layout_height="wrap_content"/>
+
+    <androidx.appcompat.widget.AppCompatSpinner
+        android:id="@+id/talukSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <androidx.appcompat.widget.AppCompatSpinner
+        android:id="@+id/citySpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:hint="@string/vehicle_registration"
+        android:id="@+id/vehicleRegEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:text="Submit"
+        android:layout_marginTop="15dp"
+        android:layout_gravity="center"
+        android:textAllCaps="false"
+        android:id="@+id/submitButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+</LinearLayout>

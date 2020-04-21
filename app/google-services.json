@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "57852935800",
+    "firebase_url": "https://covid-ccmc-travel-pass.firebaseio.com",
+    "project_id": "covid-ccmc-travel-pass",
+    "storage_bucket": "covid-ccmc-travel-pass.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:57852935800:android:872e56a611b7068836b78d",
+        "android_client_info": {
+          "package_name": "com.ccmc.covid.travelpass"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "57852935800-gdffl8tmt55r53lgne561ml0f9vvt5bv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ccmc.covid.travelpass",
+            "certificate_hash": "e26c37fdbca958722518b39413bc423a456f549d"
+          }
+        },
+        {
+          "client_id": "57852935800-t11jdaii0resbee00dkom6i874d2dspq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqczZxUrRlW8x5fF-asGYI1cf8Z14-HN0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "57852935800-t11jdaii0resbee00dkom6i874d2dspq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

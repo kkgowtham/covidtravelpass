@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <entry>
+        <key>days</key>
+        <value>6400</value>
+    </entry>
+    <entry>
+        <key>limit</key>
+        <value>7200</value>
+    </entry>
+</defaultsMap>
