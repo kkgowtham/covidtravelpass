@@ -16,20 +16,52 @@ object SessionStorage{
     {
         var mPrefs: SharedPreferences = activity.getSharedPreferences(PREF_NAME,MODE_PRIVATE)
         val prefsEditor: SharedPreferences.Editor = mPrefs.edit()
-        Log.d(TAG,userModel.toString())
+       // Log.d(TAG,userModel.toString())
         val gson = Gson()
         val json = gson.toJson(userModel).toString()
-        Log.d(TAG,json)
+       // Log.d(TAG,json)
         prefsEditor.putString("user", json)
-        Log.d(TAG,prefsEditor.commit().toString())
+        prefsEditor.apply()
+        //Log.d(TAG,prefsEditor.commit().toString())
     }
 
-    fun getUser(activity: Activity):UserModel{
+    fun getUser(activity: Activity): UserModel? {
         var mPrefs: SharedPreferences = activity.getSharedPreferences(PREF_NAME,MODE_PRIVATE)
         val gson = Gson()
         val json: String? = mPrefs.getString("user", null)
-        Log.d(TAG,json)
+       // Log.d(TAG,json)
+        if (json.isNullOrEmpty())
+        {
+            return null
+        }
         val user: UserModel = gson.fromJson<UserModel>(json, UserModel::class.java)
         return user
+    }
+
+    fun savePass(activity: Activity,passModel: PassModel)
+    {
+        var mPrefs: SharedPreferences = activity.getSharedPreferences(PREF_NAME,MODE_PRIVATE)
+        val prefsEditor: SharedPreferences.Editor = mPrefs.edit()
+        Log.d(TAG,passModel.toString())
+        val gson = Gson()
+        val json = gson.toJson(passModel).toString()
+        //Log.d(TAG,json)
+        prefsEditor.putString("pass", json)
+        prefsEditor.apply()
+        //Log.d(TAG,prefsEditor.commit().toString())
+    }
+
+    fun getPass(activity: Activity): PassModel?
+    {
+        var mPrefs: SharedPreferences = activity.getSharedPreferences(PREF_NAME,MODE_PRIVATE)
+        val gson = Gson()
+        val json: String? = mPrefs.getString("pass", null)
+        //Log.d(TAG,json)
+        if (json.isNullOrEmpty())
+        {
+            return null
+        }
+        val pass: PassModel = gson.fromJson<PassModel>(json, PassModel::class.java)
+        return pass
     }
 }

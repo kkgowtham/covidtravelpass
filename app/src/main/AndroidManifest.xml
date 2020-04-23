@@ -13,7 +13,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ApplyPassActiivity"></activity>
+        <activity android:name=".ViewPassActivity" />
+        <activity android:name=".ApplyPassActiivity" />
         <activity android:name=".UserDetailsActivity" />
         <activity android:name=".PhoneVerificationActivity" />
         <activity android:name=".MainActivity">

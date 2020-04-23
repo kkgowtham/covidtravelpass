@@ -7,9 +7,10 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:text="Loading..."
+        android:text="Validating..."
         android:id="@+id/textViewAlertDialog"
         android:textSize="30sp"
+        android:textColor="@color/blue"
         style="@style/TextAppearance.AppCompat.Large"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>

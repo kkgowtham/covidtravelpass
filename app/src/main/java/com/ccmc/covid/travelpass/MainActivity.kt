@@ -3,15 +3,18 @@ package com.ccmc.covid.travelpass
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.agrawalsuneet.dotsloader.loaders.LazyLoader
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.CollectionReference
@@ -22,7 +25,6 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.concurrent.Semaphore
 import java.util.concurrent.atomic.AtomicBoolean
 
 
@@ -36,10 +38,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        remoteConfig= FirebaseRemoteConfig.getInstance()
-        setRemoteConfig()
         firebaseAuth= FirebaseAuth.getInstance()
         firebaseUser= firebaseAuth.currentUser
+        remoteConfig= FirebaseRemoteConfig.getInstance()
+        setRemoteConfig()
+        saveUserData()
         emergencyButton.setOnClickListener {
            showDialog()
             checkForPass("Emergency")
@@ -47,6 +50,31 @@ class MainActivity : AppCompatActivity() {
         essentialsButton.setOnClickListener{
             showDialog()
             checkForPass("Essential")
+        }
+        viewPassButton.setOnClickListener {
+            if(SessionStorage.getPass(this@MainActivity)==null)
+            {
+                showSnackBar(viewPassButton,"No Pass Found")
+            }else {
+                startActivity(Intent(this, ViewPassActivity::class.java))
+            }
+        }
+    }
+
+    private fun saveUserData() {
+        if (SessionStorage.getUser(this)==null)
+        {
+            if(firebaseUser!=null) {
+                FirebaseFirestore.getInstance().collection("users").document(firebaseUser?.uid!!)
+                    .get().addOnSuccessListener {
+                    var userModel = it.toObject(UserModel::class.java)
+                        Log.d(TAG,userModel.toString())
+                    userModel?.let {
+                        SessionStorage.saveUser(userModel, this)
+                        Log.d(TAG,SessionStorage.getUser(this).toString())
+                    }
+                }
+            }
         }
     }
 
@@ -68,10 +96,12 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun checkForPass(reasonType:String){
-        val userId : String = firebaseUser?.uid.toString()
+        //val userId : String = firebaseUser?.uid.toString()
         val phoneNumber:String = firebaseUser?.phoneNumber.toString()
         val collectionReference:CollectionReference= FirebaseFirestore.getInstance().collection("requests")
-        val query : Query = collectionReference.whereEqualTo("address",SessionStorage.getUser(this).fullAddress)
+        val query : Query = collectionReference.whereEqualTo("address",
+            SessionStorage.getUser(this)?.fullAddress
+        )
             .orderBy("createdTimeStamp",Query.Direction.DESCENDING)
             .limit(1)
         val list = ArrayList<PassModel>()
@@ -111,19 +141,11 @@ class MainActivity : AppCompatActivity() {
                             } else {
                                 if (passModel.userId == firebaseUser?.uid) {
                                     Log.d(TAG, "You cannot apply for pass")
-                                    Toast.makeText(
-                                        applicationContext,
-                                        "You cannot apply for pass",
-                                        Toast.LENGTH_LONG
-                                    ).show()
+                                    showSnackBar(viewPassButton,"You cannot apply for pass again")
                                     dismissDialog()
                                 } else {
                                     Log.d(TAG, "Someone from same address applied for pass")
-                                    Toast.makeText(
-                                        applicationContext,
-                                        "Someone from same address applied for pass",
-                                        Toast.LENGTH_LONG
-                                    ).show()
+                                    showSnackBar(viewPassButton,"Someone from same address applied for pass")
                                 }
                                 dismissDialog()
                                 succeeded.set(false)
@@ -156,12 +178,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun showDialog(){
+    private fun showDialog(){
         alertDialog=AlertDialog.Builder(this).create()
         val view:View = LayoutInflater.from(this).inflate(R.layout.alertdialog_layout,null,false)
-        var lazyLoader = LazyLoader(this, 15, 5,
-            ContextCompat.getColor(this, R.color.colorPrimary),
-            ContextCompat.getColor(this, R.color.colorAccent),
+        var lazyLoader = LazyLoader(this, 25, 10,
+            ContextCompat.getColor(this, R.color.blue),
+            ContextCompat.getColor(this, R.color.blue),
             ContextCompat.getColor(this, R.color.blue))
             .apply {
                 animDuration = 500
@@ -180,12 +202,45 @@ class MainActivity : AppCompatActivity() {
 
     private fun  dismissDialog()
     {
-
-        alertDialog?.let {
+        alertDialog.let {
             if (it.isShowing) {
                 it.dismiss()
                 Log.d(TAG,"Dismissed")
             }
         }
     }
+
+    private fun showSnackBar(root: View?, snackTitle: String?) {
+        val snackbar = Snackbar.make(root!!, snackTitle!!, Snackbar.LENGTH_LONG)
+        snackbar.setAction("OK") {
+            reloadPass()
+            snackbar.dismiss()
+        }
+        snackbar.show()
+        val view = snackbar.view
+        val txtv = view.findViewById<View>(com.google.android.material.R.id.snackbar_text) as TextView
+        txtv.gravity = Gravity.CENTER_HORIZONTAL
+    }
+
+    private fun reloadPass() {
+        val query : Query = FirebaseFirestore.getInstance().collection("requests").whereEqualTo("userId",firebaseUser?.uid)
+            .orderBy("createdTimeStamp",Query.Direction.DESCENDING)
+            .limit(1)
+        query.get().addOnCompleteListener{
+            if(it.isSuccessful) {
+                val a = it.result?.documents?.size ?: return@addOnCompleteListener
+                if (a==0)
+                {
+                    return@addOnCompleteListener
+                }
+                val passModel = it.result!!.documents[0].toObject(PassModel::class.java)
+                if(passModel!=null)
+                {
+                    SessionStorage.savePass(this@MainActivity,passModel)
+                }
+            }
+        }
+    }
+
+
 }

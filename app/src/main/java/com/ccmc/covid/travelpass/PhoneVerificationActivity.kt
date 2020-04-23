@@ -19,29 +19,33 @@ class PhoneVerificationActivity : AppCompatActivity() {
     private var canRegister : Boolean= false
     lateinit var  remoteDeviceId: String
     lateinit var remotePhoneno: String
+    private val otpBottomSheetDialog = OtpBottomSheetDialog()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_phone_verification)
-        phoneNumberEditText.setText("8883502600")
         val android_id: String = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
         Log.d(TAG,android_id)
         checkDeviceId(android_id)
         sendOtpButton.setOnClickListener { v ->
-            if (phoneNumberEditText.text.trim().startsWith("+91"))
+            if (phoneNumberEditText.text!!.trim().startsWith("+91"))
             {
-                phoneNumberEditText.setText(phoneNumberEditText.text.substring(3).trim())
+                phoneNumberEditText.setText(phoneNumberEditText.text!!.substring(3).trim())
             }
                 val phoneNo = phoneNumberEditText.text.toString().trim()
                 if (phoneNo.length == 10) {
                     var fullPhoneNumber = "+91" + phoneNo
                     if (!canRegister)
                     {
+                        if (::remotePhoneno.isInitialized){
                         if (fullPhoneNumber != remotePhoneno)
                         {
                             Toast.makeText(this,"This device already registered with Another Number",Toast.LENGTH_LONG).show()
                             return@setOnClickListener
+                        }else{
+                            showBottomSheetFragment(fullPhoneNumber)
                         }
-                    }
+                        }
+                    }else
                     showBottomSheetFragment(fullPhoneNumber)
                 } else {
                     Toast.makeText(
@@ -71,11 +75,11 @@ class PhoneVerificationActivity : AppCompatActivity() {
                 }else{
                     canRegister = true
                 }
+
             }
     }
 
     private fun showBottomSheetFragment( phoneno:String){
-        val otpBottomSheetDialog = OtpBottomSheetDialog()
         otpBottomSheetDialog.isCancelable = false
         var bundle =  Bundle()
         bundle.putString("phoneno",phoneno)
@@ -83,4 +87,8 @@ class PhoneVerificationActivity : AppCompatActivity() {
         otpBottomSheetDialog.show(supportFragmentManager,"Dialog")
     }
 
+    override fun onPause() {
+        super.onPause()
+        otpBottomSheetDialog.dismiss()
+    }
 }

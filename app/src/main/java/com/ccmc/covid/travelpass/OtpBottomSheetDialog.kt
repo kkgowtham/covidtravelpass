@@ -5,18 +5,25 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import android.widget.Toast
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.android.synthetic.main.activity_phone_verification.view.*
+import kotlinx.android.synthetic.main.otp_bottom_sheet_layout.*
 import kotlinx.android.synthetic.main.otp_bottom_sheet_layout.view.*
 import java.util.concurrent.TimeUnit
+import kotlin.math.log
 
 class OtpBottomSheetDialog : BottomSheetDialogFragment() {
 
@@ -27,21 +34,59 @@ class OtpBottomSheetDialog : BottomSheetDialogFragment() {
     lateinit var storedVerificationId : String
     lateinit var a:Activity
     lateinit var c:Context
+     lateinit var  v : View
+     var smsCode :String? = null
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        var view:View=LayoutInflater.from(context).inflate(R.layout.otp_bottom_sheet_layout,null,false)
+         var view:View=LayoutInflater.from(context).inflate(R.layout.otp_bottom_sheet_layout,null,false)
+        v=view
         firebaseAuth=FirebaseAuth.getInstance()
-        arguments?.getString("phoneno")?.let { sendOtp(it) }
-        view.editTextOtp.setText("123456")
+        var number = arguments?.getString("phoneno")
+        number?.let {
+            view.numberDialog.text = number
+            sendOtp(it)
+        }
         view.verifyOTPButton.setOnClickListener { v ->
-            val otp:String= view.editTextOtp.text.toString().trim()
-            val credential = PhoneAuthProvider.getCredential(storedVerificationId,otp)
-            signInWithPhoneAuthCredential(credential)
+            if (::storedVerificationId.isInitialized) {
+                if (!smsCode.isNullOrEmpty())
+                {
+                    val credential = PhoneAuthProvider.getCredential(storedVerificationId, smsCode.toString())
+                    signInWithPhoneAuthCredential(credential)
+                }else {
+                    val otp: String = view.editTextOtp.text.toString().trim()
+                    Log.d(TAG, otp)
+                    val credential = PhoneAuthProvider.getCredential(storedVerificationId, otp)
+                    signInWithPhoneAuthCredential(credential)
+                }
+            }
+        }
+        view.changeNumberTextView.setOnClickListener {
+            this.dismiss()
+        }
+        view.otpResendTextView.setOnClickListener {
+            arguments?.getString("phoneno")?.let {
+                    it1 -> resendOtp(it1)
+            Toast.makeText(c,"Resent OTP",Toast.LENGTH_SHORT).show()
+            }
+
         }
         return view
+    }
+
+    private fun resendOtp(phoneNumber: String) {
+        if (::resendToken.isInitialized) {
+            PhoneAuthProvider.getInstance().verifyPhoneNumber(
+                phoneNumber,
+                60,
+                TimeUnit.SECONDS,
+                a,
+                callbacks,
+                resendToken
+            )
+        }
     }
 
 
@@ -50,12 +95,11 @@ class OtpBottomSheetDialog : BottomSheetDialogFragment() {
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(TAG, "signInWithCredential:success")
-
                     val user = task.result?.user
                     // ...
-                    this.dismiss()
                     if(user?.displayName.isNullOrEmpty())
                     {
+                        this.dismiss()
                         val intent=Intent(context,UserDetailsActivity::class.java)
                         intent.flags=Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                         startActivity(intent)
@@ -67,6 +111,7 @@ class OtpBottomSheetDialog : BottomSheetDialogFragment() {
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
                     if (task.exception is FirebaseAuthInvalidCredentialsException) {
                         // The verification code entered was invalid
+                        Log.d(TAG, (task.exception as FirebaseAuthInvalidCredentialsException).message.toString())
                     }
                 }
             }
@@ -77,10 +122,17 @@ class OtpBottomSheetDialog : BottomSheetDialogFragment() {
 
             override fun onVerificationCompleted(credential: PhoneAuthCredential) {
                 Log.d(TAG, "onVerificationCompleted:$credential")
+                smsCode = credential.smsCode
+                v.editTextOtp.setText(credential.smsCode)
+                v.verifyOTPButton.performClick()
             }
 
             override fun onVerificationFailed(e: FirebaseException) {
                 Log.w(TAG, "onVerificationFailed", e)
+                Log.d(TAG,e.message.toString())
+                showSnackBar(v.rootView,e.message)
+                //dismiss()
+                Toast.makeText(requireContext(),e.message,Toast.LENGTH_LONG).show()
             }
 
             override fun onCodeSent(
@@ -90,6 +142,7 @@ class OtpBottomSheetDialog : BottomSheetDialogFragment() {
                 Log.d(TAG, "onCodeSent:$verificationId")
                 storedVerificationId = verificationId
                 resendToken = token
+                verifyOTPButton.isEnabled = true
             }
         }
 
@@ -99,8 +152,6 @@ class OtpBottomSheetDialog : BottomSheetDialogFragment() {
             TimeUnit.SECONDS, // Unit of timeout
             activity!!, // Activity (for callback binding)
             callbacks) // OnVerificationStateChangedCallbacks
-
-
     }
 
     private fun saveUser(uid: String)
@@ -122,6 +173,18 @@ class OtpBottomSheetDialog : BottomSheetDialogFragment() {
         if (context is Activity)
         {
             a = context
+            Log.d(TAG,"Yes")
         }
+    }
+
+    private fun showSnackBar(root: View?, snackTitle: String?) {
+        val snackbar = Snackbar.make(root!!, snackTitle!!, Snackbar.LENGTH_INDEFINITE)
+        snackbar.setAction("OK") {
+            snackbar.dismiss()
+        }
+        snackbar.show()
+        val view = snackbar.view
+        val txtv = view.findViewById<View>(com.google.android.material.R.id.snackbar_text) as TextView
+        txtv.gravity = Gravity.CENTER_HORIZONTAL
     }
 }

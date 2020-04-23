@@ -1,43 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="vertical"
+    android:scrollbarSize="0dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:gravity="center"
     tools:context=".UserDetailsActivity">
-    <EditText
-        android:id="@+id/nameEditText"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textField"
+        android:layout_width="match_parent"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:layout_height="wrap_content"
         android:hint="@string/enter_name"
+        >
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/nameEditText"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-    <EditText
-        android:id="@+id/addressLine"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        app:errorEnabled="true"
+        android:maxLines="1"
+        />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
+        android:layout_marginStart="10dp"
+        app:errorEnabled="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:layout_height="wrap_content"
         android:hint="@string/address_line_1"
-        android:layout_height="wrap_content"/>
+        >
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/addressLine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:maxLines="1"
+            />
+    </com.google.android.material.textfield.TextInputLayout>
+
 
     <androidx.appcompat.widget.AppCompatSpinner
-        android:id="@+id/talukSpinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <androidx.appcompat.widget.AppCompatSpinner
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"
         android:id="@+id/citySpinner"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/Widget.AppCompat.Spinner.Underlined"
+        />
+
+    <androidx.appcompat.widget.AppCompatSpinner
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"
+        android:id="@+id/talukSpinner"
+        android:layout_width="match_parent"
+        style="@style/Widget.AppCompat.Spinner.Underlined"
         android:layout_height="wrap_content"/>
 
-    <EditText
-        android:hint="@string/vehicle_registration"
-        android:id="@+id/vehicleRegEditText"
+
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        app:errorEnabled="true"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/vehicle_registration"
+
+        >
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_marginTop="10dp"
+            android:id="@+id/vehicleRegEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:maxLines="1"
+            />
+    </com.google.android.material.textfield.TextInputLayout>
     <Button
         android:text="Submit"
         android:layout_marginTop="15dp"
         android:layout_gravity="center"
         android:textAllCaps="false"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:id="@+id/submitButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:paddingStart="40dp"
+        android:paddingEnd="40dp"
+        android:textSize="20sp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"/>
 </LinearLayout>
+</ScrollView>

@@ -3,17 +3,66 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-
-    <TextView
+<LinearLayout
+    android:padding="5dp"
+    android:background="@color/light_grey"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <com.google.android.material.textview.MaterialTextView
         android:layout_marginTop="10dp"
-        android:textSize="17sp"
+        android:layout_marginStart="30dp"
         android:id="@+id/otpDescTextView"
-        android:text="@string/otp_send_to"
-        android:gravity="center"
+        android:textColor="#8395A7"
+        android:text="OTP Sent To"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/numberDialog"
+        android:layout_weight="1.4"
+        style="@style/TextAppearance.AppCompat.Medium"
+        android:layout_marginStart="30dp"
+        android:layout_width="wrap_content"
+        android:textStyle="bold"
+        android:layout_height="wrap_content"/>
+        <com.google.android.material.textview.MaterialTextView
+            android:text="Change Number"
+            android:id="@+id/changeNumberTextView"
+            android:textAllCaps="false"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+            style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+</LinearLayout>
+</LinearLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_marginTop="10dp"
+        android:id="@+id/textField"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:layout_height="wrap_content"
+        android:hint="Enter OTP">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editTextOtp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:maxLines="1"
+            />
+    </com.google.android.material.textfield.TextInputLayout>
     <EditText
-        android:id="@+id/editTextOtp"
+        android:visibility="gone"
+        android:id="@+id/editTextOtp1"
         android:hint="@string/enter_otp"
         android:layout_width="match_parent"
         android:layout_marginStart="50dp"
@@ -24,13 +73,26 @@
         android:layout_height="match_parent"
         android:importantForAutofill="no"
         android:inputType="number" />
-    <Button
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/otpResendTextView"
+        android:text="Resend OTP"
+        android:textAllCaps="false"
+        android:layout_marginEnd="20dp"
+        android:layout_gravity="end"
+        style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <com.google.android.material.button.MaterialButton
+        style="@style/Widget.MaterialComponents.Button"
         android:id="@+id/verifyOTPButton"
         android:text="@string/verify_otp"
         android:textAllCaps="false"
+        android:paddingStart="65dp"
+        android:paddingEnd="65dp"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="30dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 </LinearLayout>

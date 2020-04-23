@@ -4,12 +4,12 @@
     <string name="otp_send_to">Otp Send To</string>
     <string name="enter_otp">Enter OTP</string>
     <string name="verify_otp">Verify OTP</string>
-    <string name="emergency">Emergency</string>
-    <string name="essentials">Essentials</string>
+    <string name="emergency">Emergency \n Pass</string>
+    <string name="essentials">Essential \n Pass</string>
     <string name="enter_name">Enter Name</string>
     <string name="door_no">Door No</string>
     <string name="address_line_1">Address Line 1</string>
-    <string name="vehicle_registration">Vehicle Registration</string>
+    <string name="vehicle_registration">Vehicle Registration No</string>
 
     <string-array name="taluk">
         <item>Annur</item>
