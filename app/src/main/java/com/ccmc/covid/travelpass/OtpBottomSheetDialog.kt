@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.android.synthetic.main.activity_phone_verification.view.*
 import kotlinx.android.synthetic.main.otp_bottom_sheet_layout.*
 import kotlinx.android.synthetic.main.otp_bottom_sheet_layout.view.*
@@ -102,8 +103,11 @@ class OtpBottomSheetDialog : BottomSheetDialogFragment() {
                         this.dismiss()
                         val intent=Intent(context,UserDetailsActivity::class.java)
                         intent.flags=Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        intent.putExtra("reload",true)
                         startActivity(intent)
                     }else {
+                        reloadPass("Essential")
+                        reloadPass("Emergency")
                         saveUser(user!!.uid)
                     }
                 } else {
@@ -130,9 +134,10 @@ class OtpBottomSheetDialog : BottomSheetDialogFragment() {
             override fun onVerificationFailed(e: FirebaseException) {
                 Log.w(TAG, "onVerificationFailed", e)
                 Log.d(TAG,e.message.toString())
-                showSnackBar(v.rootView,e.message)
-                //dismiss()
-                Toast.makeText(requireContext(),e.message,Toast.LENGTH_LONG).show()
+               // showSnackBar(v.rootView,e.message)
+                Toast.makeText(context,"Error Occurred",Toast.LENGTH_LONG).show()
+                dismiss()
+                //Toast.makeText(requireContext(),e.message,Toast.LENGTH_LONG).show()
             }
 
             override fun onCodeSent(
@@ -186,5 +191,30 @@ class OtpBottomSheetDialog : BottomSheetDialogFragment() {
         val view = snackbar.view
         val txtv = view.findViewById<View>(com.google.android.material.R.id.snackbar_text) as TextView
         txtv.gravity = Gravity.CENTER_HORIZONTAL
+    }
+
+    private fun reloadPass(reasonType: String) {
+        if (reasonType.trim().isNotEmpty()) {
+            val query: Query = FirebaseFirestore.getInstance().collection(reasonType)
+                .whereEqualTo("userId", firebaseAuth.currentUser?.uid)
+                .orderBy("createdTimeStamp", Query.Direction.DESCENDING)
+                .limit(1)
+            query.get().addOnCompleteListener {
+                if (it.isSuccessful) {
+                    val a = it.result?.documents?.size ?: return@addOnCompleteListener
+                    if (a == 0) {
+                        return@addOnCompleteListener
+                    }
+                    val passModel = it.result!!.documents[0].toObject(PassModel::class.java)
+                    if (passModel != null && passModel.isEmergency()) {
+                        SessionStorage.saveEmergencyPass(this.a, passModel)
+                    }
+                    if (passModel != null && passModel.isEssential()) {
+                        SessionStorage.saveEssentialPass(this.a, passModel)
+                    }
+                    Log.d(TAG,passModel.toString())
+                }
+            }
+        }
     }
 }

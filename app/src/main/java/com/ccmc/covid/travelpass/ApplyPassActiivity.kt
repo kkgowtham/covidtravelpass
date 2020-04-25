@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnFocusChangeListener
 import android.view.animation.DecelerateInterpolator
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -40,6 +41,20 @@ class ApplyPassActiivity : AppCompatActivity() {
         type = intent.getStringExtra("type")!!
         val n = "$type Pass"
         typeTextView.text = n
+        descriptionEditText.onFocusChangeListener = OnFocusChangeListener { v, hasFocus ->
+            if (type== "Essential") {
+                if (hasFocus) {
+                    tiApplyPass.hint = "Description"
+                } else {
+                    if (descriptionEditText.length()>0){
+                        tiApplyPass.hint = "Description"
+                    }else {
+                        tiApplyPass.hint = "Description (Eg:)Groceries"
+                    }
+                }
+            }
+        }
+
         applyPassButton.setOnClickListener{
             if (descriptionEditText.text.toString().trim().isEmpty())
             {
@@ -64,15 +79,23 @@ class ApplyPassActiivity : AppCompatActivity() {
     )
     {
         showDialog()
-        val diff : Long = remoteConfig!!.getLong("limit")
+        var diff : Long = 0
+        if (type.equals("Essential"))
+            diff  = remoteConfig!!.getLong("essentialPassValiditySeconds")
+        if (type.equals("Emergency"))
+            diff = remoteConfig!!.getLong("emergencyPassValiditySeconds")
         val user = getUserInfo()
         val timeStamp = (System.currentTimeMillis() / 1000L)
         val endTimeStamp = ((System.currentTimeMillis() / 1000L)+diff)
         val passModel = PassModel(user.name,user.phoneNumber,user.fullAddress, type!!,description,timeStamp,endTimeStamp,user.vehicleNumber,user.userId,destination)
-        val collectionReference: CollectionReference = FirebaseFirestore.getInstance().collection("requests")
+        val collectionReference: CollectionReference = FirebaseFirestore.getInstance().collection(type)
         collectionReference.document().set(passModel).addOnCompleteListener{
             if (it.isSuccessful) {
-                    SessionStorage.savePass(this,passModel)
+                    if (passModel.isEssential()) {
+                        SessionStorage.saveEssentialPass(this, passModel)
+                    }else{
+                        SessionStorage.saveEmergencyPass(this,passModel)
+                    }
                     dismissDialog()
                     Toast.makeText(applicationContext,"Pass Approved",Toast.LENGTH_LONG).show()
                     finish()
@@ -102,9 +125,9 @@ class ApplyPassActiivity : AppCompatActivity() {
         val view: View = LayoutInflater.from(this).inflate(R.layout.alertdialog_layout,null,false)
         view.textViewAlertDialog.setText("Applying...")
         var lazyLoader = LazyLoader(this, 25, 10,
-            ContextCompat.getColor(this, R.color.blue),
-            ContextCompat.getColor(this, R.color.blue),
-            ContextCompat.getColor(this, R.color.blue))
+            ContextCompat.getColor(this, R.color.colorPrimary),
+            ContextCompat.getColor(this, R.color.colorPrimary),
+            ContextCompat.getColor(this, R.color.colorPrimaryDark))
             .apply {
                 animDuration = 500
                 firstDelayDuration = 100

@@ -25,8 +25,6 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.concurrent.atomic.AtomicBoolean
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -35,6 +33,8 @@ class MainActivity : AppCompatActivity() {
     var TAG:String = this.javaClass.simpleName
     var remoteConfig: FirebaseRemoteConfig? =null
     lateinit var alertDialog:AlertDialog
+    val list = ArrayList<PassModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -44,17 +44,25 @@ class MainActivity : AppCompatActivity() {
         setRemoteConfig()
         saveUserData()
         emergencyButton.setOnClickListener {
-           showDialog()
-            checkForPass("Emergency")
+            if (canApplyEmergencyPass()) {
+                showDialog()
+                checkForPass("Emergency")
+            }else{
+                showSnackBar(viewPassButton,"You already have a valid pass","Emergency")
+            }
         }
         essentialsButton.setOnClickListener{
-            showDialog()
-            checkForPass("Essential")
+            if (canApplyEssentialPass()) {
+                showDialog()
+                checkForPass("Essential")
+            }else{
+                showSnackBar(viewPassButton,"You already have a valid pass","Essential")
+            }
         }
         viewPassButton.setOnClickListener {
-            if(SessionStorage.getPass(this@MainActivity)==null)
+            if(SessionStorage.getEmergencyPass(this@MainActivity)==null&&SessionStorage.getEssentialPass(this@MainActivity)==null)
             {
-                showSnackBar(viewPassButton,"No Pass Found")
+                showSnackBar(viewPassButton,"No Pass Found","")
             }else {
                 startActivity(Intent(this, ViewPassActivity::class.java))
             }
@@ -67,7 +75,7 @@ class MainActivity : AppCompatActivity() {
             if(firebaseUser!=null) {
                 FirebaseFirestore.getInstance().collection("users").document(firebaseUser?.uid!!)
                     .get().addOnSuccessListener {
-                    var userModel = it.toObject(UserModel::class.java)
+                    val userModel = it.toObject(UserModel::class.java)
                         Log.d(TAG,userModel.toString())
                     userModel?.let {
                         SessionStorage.saveUser(userModel, this)
@@ -97,70 +105,53 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkForPass(reasonType:String){
         //val userId : String = firebaseUser?.uid.toString()
+        list.clear()
+        FirebaseFirestore.getInstance().collection(reasonType).whereEqualTo("vehicleNumber",SessionStorage.getUser(this)?.vehicleNumber)
+            .orderBy("createdTimeStamp",Query.Direction.DESCENDING)
+            .limit(1).get().addOnSuccessListener {
+                if (it!=null && it.size()>0) {
+                    for (a in it) {
+                        list.add(a.toObject(PassModel::class.java))
+                    }
+                    updateAddressList(reasonType)
+                }
+                else{
+                    updateAddressList(reasonType)
+                }
+            }.addOnFailureListener{
+                Log.d(TAG,it.message.toString())
+                updateAddressList(reasonType)
+            }
+
+    }
+
+    private fun updateAddressList(reasonType: String) {
         val phoneNumber:String = firebaseUser?.phoneNumber.toString()
-        val collectionReference:CollectionReference= FirebaseFirestore.getInstance().collection("requests")
+        val collectionReference:CollectionReference= FirebaseFirestore.getInstance().collection(reasonType)
         val query : Query = collectionReference.whereEqualTo("address",
             SessionStorage.getUser(this)?.fullAddress
         )
             .orderBy("createdTimeStamp",Query.Direction.DESCENDING)
             .limit(1)
-        val list = ArrayList<PassModel>()
-        val succeeded = AtomicBoolean()
         query.get().addOnCompleteListener{
             if (it.isSuccessful)
             {
-             val value = it.result
-
-                if (value != null) {
-                    if (value.size()==0)
+                val value = it.result
+                    if (value != null&&value.size()>=0)
                     {
-                        dismissDialog()
-                        val intent = Intent(this, ApplyPassActiivity::class.java)
-                        intent.putExtra("type", reasonType)
-                        startActivity(intent)
-                    }else {
                         for (a in value) {
-                            val passModel: PassModel = a.toObject(PassModel::class.java)
-                            list.add(passModel)
-                            val daysInSeconds: Long? = remoteConfig?.getLong("days")
-                            Log.d(TAG, daysInSeconds.toString())
-                            val diff: Long =
-                                (System.currentTimeMillis() / 1000L) - (passModel.createdTimeStamp)
-                            Log.d(
-                                TAG,
-                                (System.currentTimeMillis() / 1000L).toString() + "\n" + passModel.createdTimeStamp.toString() + "\n" + diff.toString()
-                            )
-                            if (diff > daysInSeconds!!) {
-                                succeeded.set(true)
-                                Log.d(TAG, "1")
-                                Log.d(TAG, phoneNumber)
-                                dismissDialog()
-                                val intent = Intent(this, ApplyPassActiivity::class.java)
-                                intent.putExtra("type", reasonType)
-                                startActivity(intent)
-                            } else {
-                                if (passModel.userId == firebaseUser?.uid) {
-                                    Log.d(TAG, "You cannot apply for pass")
-                                    showSnackBar(viewPassButton,"You cannot apply for pass again")
-                                    dismissDialog()
-                                } else {
-                                    Log.d(TAG, "Someone from same address applied for pass")
-                                    showSnackBar(viewPassButton,"Someone from same address applied for pass")
-                                }
-                                dismissDialog()
-                                succeeded.set(false)
-                            }
+                            list.add(a.toObject(PassModel::class.java))
                         }
+                        checkValidityForPass(reasonType)
+                    }else {
+                        checkValidityForPass(reasonType)
                     }
+                }else{
+                    dismissDialog()
+                    Toast.makeText(applicationContext,"Error occured",Toast.LENGTH_LONG).show()
                 }
-            }else{
-                Log.d(TAG,it.exception?.message!!)
-                Log.d(TAG,"3")
-                Toast.makeText(applicationContext,"Error Occured",Toast.LENGTH_LONG).show()
-                succeeded.set(false)
-                dismissDialog()
             }
-        }
+
     }
 
     private fun setRemoteConfig()
@@ -182,9 +173,9 @@ class MainActivity : AppCompatActivity() {
         alertDialog=AlertDialog.Builder(this).create()
         val view:View = LayoutInflater.from(this).inflate(R.layout.alertdialog_layout,null,false)
         var lazyLoader = LazyLoader(this, 25, 10,
-            ContextCompat.getColor(this, R.color.blue),
-            ContextCompat.getColor(this, R.color.blue),
-            ContextCompat.getColor(this, R.color.blue))
+            ContextCompat.getColor(this, R.color.colorPrimary),
+            ContextCompat.getColor(this, R.color.colorPrimary),
+            ContextCompat.getColor(this, R.color.colorPrimaryDark))
             .apply {
                 animDuration = 500
                 firstDelayDuration = 100
@@ -210,10 +201,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showSnackBar(root: View?, snackTitle: String?) {
+    private fun showSnackBar(root: View?, snackTitle: String?,reasonType: String) {
         val snackbar = Snackbar.make(root!!, snackTitle!!, Snackbar.LENGTH_LONG)
         snackbar.setAction("OK") {
-            reloadPass()
+            reloadPass(reasonType)
             snackbar.dismiss()
         }
         snackbar.show()
@@ -222,25 +213,108 @@ class MainActivity : AppCompatActivity() {
         txtv.gravity = Gravity.CENTER_HORIZONTAL
     }
 
-    private fun reloadPass() {
-        val query : Query = FirebaseFirestore.getInstance().collection("requests").whereEqualTo("userId",firebaseUser?.uid)
-            .orderBy("createdTimeStamp",Query.Direction.DESCENDING)
-            .limit(1)
-        query.get().addOnCompleteListener{
-            if(it.isSuccessful) {
-                val a = it.result?.documents?.size ?: return@addOnCompleteListener
-                if (a==0)
-                {
-                    return@addOnCompleteListener
-                }
-                val passModel = it.result!!.documents[0].toObject(PassModel::class.java)
-                if(passModel!=null)
-                {
-                    SessionStorage.savePass(this@MainActivity,passModel)
+    private fun reloadPass(reasonType: String) {
+        if (reasonType.trim().isNotEmpty()) {
+            val query: Query = FirebaseFirestore.getInstance().collection(reasonType)
+                .whereEqualTo("userId", firebaseUser?.uid)
+                .orderBy("createdTimeStamp", Query.Direction.DESCENDING)
+                .limit(1)
+            query.get().addOnCompleteListener {
+                if (it.isSuccessful) {
+                    val a = it.result?.documents?.size ?: return@addOnCompleteListener
+                    if (a == 0) {
+                        return@addOnCompleteListener
+                    }
+                    val passModel = it.result!!.documents[0].toObject(PassModel::class.java)
+                    if (passModel != null && passModel.isEmergency()) {
+                        SessionStorage.saveEmergencyPass(this@MainActivity, passModel)
+                    }
+                    if (passModel != null && passModel.isEssential()) {
+                        SessionStorage.saveEssentialPass(this@MainActivity, passModel)
+                    }
                 }
             }
         }
     }
 
+    private fun goToApplyPassActivity(reasonType: String)
+    {
+        val intent = Intent(this, ApplyPassActiivity::class.java)
+        intent.putExtra("type", reasonType)
+        startActivity(intent)
+    }
+
+    private fun checkValidityForPass(reasonType: String) {
+        var p1 : PassModel = PassModel()
+        var p2 : PassModel
+        if (list.size==1) {
+            p1 = list[0]
+        }
+        if (list.size==2)
+        {
+            p2 = list[1]
+            if (p1.validityTimeStamp<=p2.validityTimeStamp)
+            {
+                list.remove(p1)
+            }else{
+                list.remove(p2)
+            }
+        }
+        if (list.size==0)
+        {
+            dismissDialog()
+            goToApplyPassActivity(reasonType)
+        }else {
+                var passModel = list[0]
+                val key :String = if (passModel.isEssential()) "essentialNextPassAfter" else "emergencyNextPassAfter"
+                val daysInSeconds: Long? = remoteConfig?.getLong(key)
+                Log.d(TAG, daysInSeconds.toString())
+                val diff: Long =
+                    (System.currentTimeMillis() / 1000L) - (passModel.createdTimeStamp)
+                Log.d(
+                    TAG,
+                    (System.currentTimeMillis() / 1000L).toString() + "\n" + passModel.createdTimeStamp.toString() + "\n" + diff.toString()
+                )
+                if (diff > daysInSeconds!!) {
+                    Log.d(TAG, "1")
+                    dismissDialog()
+                    val intent = Intent(this, ApplyPassActiivity::class.java)
+                    intent.putExtra("type", reasonType)
+                    startActivity(intent)
+                } else {
+                    if (passModel.userId == firebaseUser?.uid) {
+                        Log.d(TAG, "You cannot apply for pass")
+                        showSnackBar(viewPassButton, "You cannot apply for pass again", reasonType)
+                        dismissDialog()
+                    } else {
+                        Log.d(TAG, "Someone from same address applied for pass")
+                            showSnackBar(
+                                viewPassButton,
+                                "Someone from same address or vehicle no. applied for pass",
+                                reasonType
+                            )
+                    }
+                    dismissDialog()
+                }
+            }
+    }
+
+    private fun canApplyEssentialPass():Boolean
+    {
+        val passModel: PassModel = SessionStorage.getEssentialPass(this@MainActivity) ?: return true
+        if (passModel.isValidPass()) {
+            return false
+        }
+        return true
+    }
+
+    private fun canApplyEmergencyPass():Boolean
+    {
+        val passModel = SessionStorage.getEmergencyPass(this@MainActivity) ?: return true
+        if (passModel.isValidPass()) {
+            return false
+        }
+        return true
+    }
 
 }

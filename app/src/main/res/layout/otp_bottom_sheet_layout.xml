@@ -80,6 +80,7 @@
         android:textAllCaps="false"
         android:layout_marginEnd="20dp"
         android:layout_gravity="end"
+        android:textColor="@color/colorPrimary"
         style="@style/Widget.MaterialComponents.Button.TextButton.Dialog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>

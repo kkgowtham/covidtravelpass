@@ -20,8 +20,9 @@
         android:layout_marginEnd="10dp"
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
+        android:id="@+id/tiApplyPass"
         android:layout_height="wrap_content"
-        android:hint="Description">
+        android:hint="Description (Eg:)Groceries">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/descriptionEditText"
             android:layout_width="match_parent"

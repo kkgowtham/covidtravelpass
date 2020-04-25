@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <defaultsMap>
     <entry>
-        <key>days</key>
-        <value>6400</value>
+        <key>essentialNextPassAfter</key>
+        <value>86400</value>
     </entry>
     <entry>
-        <key>limit</key>
+        <key>essentialPassValiditySeconds</key>
+        <value>7200</value>
+    </entry>
+    <entry>
+        <key>emergencyNextPassAfter</key>
+        <value>604800</value>
+    </entry>
+    <entry>
+        <key>emergencyPassValiditySeconds</key>
         <value>7200</value>
     </entry>
 </defaultsMap>

@@ -38,7 +38,7 @@ object SessionStorage{
         return user
     }
 
-    fun savePass(activity: Activity,passModel: PassModel)
+    fun saveEmergencyPass(activity: Activity,passModel: PassModel)
     {
         var mPrefs: SharedPreferences = activity.getSharedPreferences(PREF_NAME,MODE_PRIVATE)
         val prefsEditor: SharedPreferences.Editor = mPrefs.edit()
@@ -46,16 +46,43 @@ object SessionStorage{
         val gson = Gson()
         val json = gson.toJson(passModel).toString()
         //Log.d(TAG,json)
-        prefsEditor.putString("pass", json)
+        prefsEditor.putString("emergencyPass", json)
         prefsEditor.apply()
         //Log.d(TAG,prefsEditor.commit().toString())
     }
 
-    fun getPass(activity: Activity): PassModel?
+    fun getEmergencyPass(activity: Activity): PassModel?
     {
         var mPrefs: SharedPreferences = activity.getSharedPreferences(PREF_NAME,MODE_PRIVATE)
         val gson = Gson()
-        val json: String? = mPrefs.getString("pass", null)
+        val json: String? = mPrefs.getString("emergencyPass", null)
+        //Log.d(TAG,json)
+        if (json.isNullOrEmpty())
+        {
+            return null
+        }
+        val pass: PassModel = gson.fromJson<PassModel>(json, PassModel::class.java)
+        return pass
+    }
+
+    fun saveEssentialPass(activity: Activity,passModel: PassModel)
+    {
+        var mPrefs: SharedPreferences = activity.getSharedPreferences(PREF_NAME,MODE_PRIVATE)
+        val prefsEditor: SharedPreferences.Editor = mPrefs.edit()
+        Log.d(TAG,passModel.toString())
+        val gson = Gson()
+        val json = gson.toJson(passModel).toString()
+        //Log.d(TAG,json)
+        prefsEditor.putString("essentialPass", json)
+        prefsEditor.apply()
+        //Log.d(TAG,prefsEditor.commit().toString())
+    }
+
+    fun getEssentialPass(activity: Activity): PassModel?
+    {
+        var mPrefs: SharedPreferences = activity.getSharedPreferences(PREF_NAME,MODE_PRIVATE)
+        val gson = Gson()
+        val json: String? = mPrefs.getString("essentialPass", null)
         //Log.d(TAG,json)
         if (json.isNullOrEmpty())
         {
