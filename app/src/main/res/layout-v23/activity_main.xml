@@ -68,14 +68,14 @@
                         android:layout_marginTop="8dp"
                         android:gravity="center"
                         android:maxLines="2"
-                        app:autoSizeTextType="uniform"
-                        app:autoSizeMinTextSize="12sp"
-                        app:autoSizeMaxTextSize="100sp"
-                        app:autoSizeStepGranularity="2sp"
                         android:text="Emergency Pass"
                         android:textColor="@color/red"
                         android:textSize="21sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:autoSizeMaxTextSize="100sp"
+                        app:autoSizeMinTextSize="12sp"
+                        app:autoSizeStepGranularity="2sp"
+                        app:autoSizeTextType="uniform" />
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
@@ -116,14 +116,14 @@
                         android:layout_marginTop="8dp"
                         android:gravity="center"
                         android:maxLines="2"
-                        app:autoSizeTextType="uniform"
-                        app:autoSizeMinTextSize="12sp"
-                        app:autoSizeMaxTextSize="100sp"
-                        app:autoSizeStepGranularity="2sp"
                         android:text="Essential \nPass"
                         android:textColor="@color/green"
                         android:textSize="21sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:autoSizeMaxTextSize="100sp"
+                        app:autoSizeMinTextSize="12sp"
+                        app:autoSizeStepGranularity="2sp"
+                        app:autoSizeTextType="uniform" />
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
@@ -134,33 +134,45 @@
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="match_parent"
             android:layout_height="70dp"
-            android:layout_marginTop="30dp"
-            app:cornerRadius="25dp"
             android:layout_marginStart="20dp"
+            android:layout_marginTop="30dp"
             android:layout_marginEnd="20dp"
             android:adjustViewBounds="true"
-            app:layout_constraintHeight_percent="0.25"
-            app:layout_constraintWidth_percent="0.25"
             android:clickable="true"
             android:drawableEnd="@drawable/ic_chevron_right_black_24dp"
             android:focusable="true"
             android:foreground="?android:attr/selectableItemBackground"
             android:gravity="end|center_vertical"
+            android:maxLines="1"
             android:text="Show My Pass"
             android:textAllCaps="false"
-            android:maxLines="1"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:textSize="30sp"
-            app:autoSizeTextType="uniform"
-            app:autoSizeMinTextSize="12sp"
             app:autoSizeMaxTextSize="30sp"
+            app:autoSizeMinTextSize="12sp"
             app:autoSizeStepGranularity="2sp"
+            app:autoSizeTextType="uniform"
             app:backgroundTint="@color/colorPrimary"
+            app:cornerRadius="25dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.25"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/gridLayout"
+            app:layout_constraintWidth_percent="0.25"
             tools:targetApi="m" />
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="20dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/sri_shakthi_logo"
+            app:layout_constraintBottom_toTopOf="@+id/text_powered"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/viewPassButton" />
 
         <TextView
             android:id="@+id/text_powered"
@@ -174,7 +186,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/viewPassButton"
+            app:layout_constraintTop_toBottomOf="@+id/logo"
             app:layout_constraintVertical_bias="0.917"
             app:layout_constraintVertical_weight="1" />
     </androidx.constraintlayout.widget.ConstraintLayout>

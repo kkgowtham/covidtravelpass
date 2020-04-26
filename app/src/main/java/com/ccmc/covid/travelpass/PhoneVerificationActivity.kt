@@ -89,6 +89,10 @@ class PhoneVerificationActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        otpBottomSheetDialog.dismiss()
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finishAffinity()
     }
 }

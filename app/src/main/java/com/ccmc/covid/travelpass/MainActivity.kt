@@ -109,6 +109,7 @@ class MainActivity : AppCompatActivity() {
         FirebaseFirestore.getInstance().collection(reasonType).whereEqualTo("vehicleNumber",SessionStorage.getUser(this)?.vehicleNumber)
             .orderBy("createdTimeStamp",Query.Direction.DESCENDING)
             .limit(1).get().addOnSuccessListener {
+                Log.d(TAG,"Success")
                 if (it!=null && it.size()>0) {
                     for (a in it) {
                         list.add(a.toObject(PassModel::class.java))
@@ -284,7 +285,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     if (passModel.userId == firebaseUser?.uid) {
                         Log.d(TAG, "You cannot apply for pass")
-                        showSnackBar(viewPassButton, "You cannot apply for pass again", reasonType)
+                        showSnackBar(viewPassButton, "You cannot apply for pass again within 24 hours", reasonType)
                         dismissDialog()
                     } else {
                         Log.d(TAG, "Someone from same address applied for pass")

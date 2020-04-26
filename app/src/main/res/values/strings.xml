@@ -8,7 +8,7 @@
     <string name="essentials">Essential \n Pass</string>
     <string name="enter_name">Enter Name</string>
     <string name="door_no">Door No</string>
-    <string name="address_line_1">Full Address</string>
+    <string name="address_line_1">Full Address as per Licence</string>
     <string name="vehicle_registration">Vehicle Registration No(Eg:TN01AA0001)</string>
 
     <string-array name="taluk">
@@ -26,5 +26,5 @@
     </string-array>
     <string name="title_activity_maps">Map</string>
     <string name="dialog_text">Alert, please enter the correct details to get the travel pass.The details cannot be edited again.And also it is required to carry ID proof during travel and verification will be done. \nPlease Agree to Continue</string>
-    <string name="powered_by_text"><u>Powered By \n Sri Shakthi Institute of Engineering And Technology</u></string>
+    <string name="powered_by_text"><u>Powered By \n Sri Shakthi Institute of Engineering And Technology, L&amp;T ByPass,Coimbatore</u></string>
 </resources>

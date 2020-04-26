@@ -31,6 +31,12 @@ class ViewPassActivity : AppCompatActivity() {
         if (emergencyPass!=null)
         {
             if (isValidPass(emergencyPass.validityTimeStamp)) {
+                if ((getCurrentTimeStamp()-emergencyPass.createdTimeStamp)<300)
+                {
+                    minWithInTextView.text = "Generated within 5 minutes"
+                }else{
+                    minWithInTextView.visibility = View.GONE
+                }
                 cardView.visibility = View.VISIBLE
                 validityStatus.setBackgroundColor(ContextCompat.getColor(applicationContext,R.color.green))
                 validityStatus.text = "Status : Valid"
@@ -59,6 +65,12 @@ class ViewPassActivity : AppCompatActivity() {
         if (essentialPass!=null)
         {
             if (isValidPass(essentialPass.validityTimeStamp)) {
+                if ((getCurrentTimeStamp()-essentialPass.createdTimeStamp)<300)
+                {
+                    minWithInTextViewEssential.text = "Generated within 5 minutes"
+                }else{
+                    minWithInTextViewEssential.visibility = View.GONE
+                }
                 cardView1.visibility = View.VISIBLE
                 validityStatus1.setBackgroundColor(ContextCompat.getColor(applicationContext,R.color.green))
                 validityStatus1.text = "Status : Valid"
@@ -171,6 +183,10 @@ class ViewPassActivity : AppCompatActivity() {
  */
     private fun isValidPass(validityTimeStamp : Long):Boolean{
         return (System.currentTimeMillis() / 1000L) <= validityTimeStamp
+    }
+
+    private fun getCurrentTimeStamp():Long{
+        return (System.currentTimeMillis()/1000L)
     }
 
     @SuppressLint("SimpleDateFormat")

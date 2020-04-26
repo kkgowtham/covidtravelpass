@@ -9,8 +9,13 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
+import com.agrawalsuneet.dotsloader.loaders.LazyLoader
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.FirebaseException
@@ -21,6 +26,7 @@ import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.android.synthetic.main.activity_phone_verification.view.*
+import kotlinx.android.synthetic.main.alertdialog_layout.view.*
 import kotlinx.android.synthetic.main.otp_bottom_sheet_layout.*
 import kotlinx.android.synthetic.main.otp_bottom_sheet_layout.view.*
 import java.util.concurrent.TimeUnit
@@ -37,6 +43,8 @@ class OtpBottomSheetDialog : BottomSheetDialogFragment() {
     lateinit var c:Context
      lateinit var  v : View
      var smsCode :String? = null
+    lateinit var alertDialog :AlertDialog
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -54,9 +62,11 @@ class OtpBottomSheetDialog : BottomSheetDialogFragment() {
             if (::storedVerificationId.isInitialized) {
                 if (!smsCode.isNullOrEmpty())
                 {
+                    showDialog()
                     val credential = PhoneAuthProvider.getCredential(storedVerificationId, smsCode.toString())
                     signInWithPhoneAuthCredential(credential)
                 }else {
+                    showDialog()
                     val otp: String = view.editTextOtp.text.toString().trim()
                     Log.d(TAG, otp)
                     val credential = PhoneAuthProvider.getCredential(storedVerificationId, otp)
@@ -100,6 +110,7 @@ class OtpBottomSheetDialog : BottomSheetDialogFragment() {
                     // ...
                     if(user?.displayName.isNullOrEmpty())
                     {
+                        dismissDialog()
                         this.dismiss()
                         val intent=Intent(context,UserDetailsActivity::class.java)
                         intent.flags=Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -164,7 +175,9 @@ class OtpBottomSheetDialog : BottomSheetDialogFragment() {
          FirebaseFirestore.getInstance().collection("users")
             .document(uid).get().addOnSuccessListener {
                  var userModel : UserModel = it.toObject(UserModel::class.java)!!
-                 a.let { it1 -> SessionStorage.saveUser(userModel, it1)
+                 a.let { it1 ->
+                     SessionStorage.saveUser(userModel, it1)
+                     dismissDialog()
                      val intent = Intent(c, MainActivity::class.java)
                      intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                      c.startActivity(intent)
@@ -181,6 +194,8 @@ class OtpBottomSheetDialog : BottomSheetDialogFragment() {
             Log.d(TAG,"Yes")
         }
     }
+
+
 
     private fun showSnackBar(root: View?, snackTitle: String?) {
         val snackbar = Snackbar.make(root!!, snackTitle!!, Snackbar.LENGTH_INDEFINITE)
@@ -214,6 +229,39 @@ class OtpBottomSheetDialog : BottomSheetDialogFragment() {
                     }
                     Log.d(TAG,passModel.toString())
                 }
+            }
+        }
+    }
+
+    private fun showDialog(){
+        alertDialog= AlertDialog.Builder(a).create()
+        val view: View = LayoutInflater.from(a).inflate(R.layout.alertdialog_layout,null,false)
+        view.textViewAlertDialog.setText("Validating...")
+        var lazyLoader = LazyLoader(a, 25, 10,
+            ContextCompat.getColor(a, R.color.colorPrimary),
+            ContextCompat.getColor(a, R.color.colorPrimary),
+            ContextCompat.getColor(a, R.color.colorPrimaryDark))
+            .apply {
+                animDuration = 500
+                firstDelayDuration = 100
+                secondDelayDuration = 200
+                interpolator = DecelerateInterpolator()
+            }
+        var layout = view.findViewById<LinearLayout>(R.id.linearAlertDialog)
+        layout.addView(lazyLoader)
+        lazyLoader.animate()
+        alertDialog.setView(view)
+        alertDialog.setCancelable(false)
+        alertDialog.show()
+        Log.d(TAG,"Dialog shown")
+    }
+
+    private fun  dismissDialog()
+    {
+        alertDialog.let {
+            if (it.isShowing) {
+                it.dismiss()
+                Log.d(TAG,"Dismissed")
             }
         }
     }

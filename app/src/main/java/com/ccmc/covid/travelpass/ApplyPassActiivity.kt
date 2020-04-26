@@ -41,6 +41,12 @@ class ApplyPassActiivity : AppCompatActivity() {
         type = intent.getStringExtra("type")!!
         val n = "$type Pass"
         typeTextView.text = n
+        if (type == "Essential")
+        {
+            tiApplyPass.hint = "Description (Eg:)Groceries,Medicines"
+        }else{
+            tiApplyPass.hint = "Description (Eg:)Hospital"
+        }
         descriptionEditText.onFocusChangeListener = OnFocusChangeListener { v, hasFocus ->
             if (type== "Essential") {
                 if (hasFocus) {
@@ -49,7 +55,17 @@ class ApplyPassActiivity : AppCompatActivity() {
                     if (descriptionEditText.length()>0){
                         tiApplyPass.hint = "Description"
                     }else {
-                        tiApplyPass.hint = "Description (Eg:)Groceries"
+                        tiApplyPass.hint = "Description (Eg:)Groceries,Medicines"
+                    }
+                }
+            }else{
+                if (hasFocus) {
+                    tiApplyPass.hint = "Description"
+                } else {
+                    if (descriptionEditText.length()>0){
+                        tiApplyPass.hint = "Description"
+                    }else {
+                        tiApplyPass.hint = "Description (Eg:)Hospital"
                     }
                 }
             }

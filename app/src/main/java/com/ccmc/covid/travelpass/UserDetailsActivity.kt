@@ -1,5 +1,6 @@
 package com.ccmc.covid.travelpass
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
@@ -29,6 +30,7 @@ class UserDetailsActivity : AppCompatActivity() {
     val TAG : String = this.javaClass.simpleName
     lateinit var alertDialog:AlertDialog
     lateinit var loadingDialog : AlertDialog
+    @SuppressLint("DefaultLocale")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user_details)
@@ -47,6 +49,19 @@ class UserDetailsActivity : AppCompatActivity() {
                 }
             }
         }
+        addressLine.setOnFocusChangeListener { v, hasFocus ->
+            if (hasFocus)
+            {
+                ti_layout_address.hint = "Full address"
+            }else{
+                if (addressLine.length()>0)
+                {
+                    ti_layout_address.hint = "Full address"
+                }else{
+                    ti_layout_address.hint = "Full Address as per License"
+                }
+            }
+        }
 /*        val taluks = resources.getStringArray(R.array.taluk)
         val adapter : SpinnerAdapter = ArrayAdapter(this,android.R.layout.simple_spinner_dropdown_item,taluks)
         talukSpinner.adapter = adapter
@@ -57,10 +72,10 @@ class UserDetailsActivity : AppCompatActivity() {
         vehicleRegEditText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
         submitButton.setOnClickListener{
             val  name = nameEditText.text.toString()
-            val  addressLineText :String = addressLine.text.toString()
+            val  addressLineText :String = addressLine.text.toString().toUpperCase()
 /*            val  talukSpinnerText :String = talukSpinner.selectedItem.toString()
             val   citySpinnerText : String = citySpinner.selectedItem.toString()*/
-            val vehicleRegNo: String = vehicleRegEditText.text.toString()
+            val vehicleRegNo: String = vehicleRegEditText.text.toString().toUpperCase()
             if (name.isNullOrEmpty())
             {
                 nameEditText.error = "Name Cannot Be Empty"
@@ -82,6 +97,12 @@ class UserDetailsActivity : AppCompatActivity() {
                 vehicleRegEditText.error = "Please enter in correct format"
                 return@setOnClickListener
             }
+            if(vehicleRegNo.contains(" "))
+            {
+                vehicleRegEditText.error = "Please enter without spaces"
+                return@setOnClickListener
+            }
+
             val fullAddress:String = addressLineText
             val android_id: String = Settings.Secure.getString(contentResolver,Settings.Secure.ANDROID_ID)
             val userModel = UserModel(name,addressLineText,vehicleRegNo,fireBaseUser?.phoneNumber.toString(),fullAddress.trim(),fireBaseUser!!.uid,android_id)
